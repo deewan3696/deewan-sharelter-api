@@ -1,30 +1,30 @@
 const Joi = require('joi')
 
-const create = Joi.object({
-    lastname: Joi.string().required(),
-    othernames: Joi.string().required(),
-    email: Joi.string().email({ minDomainSegments: 2 }),
-    phone_number: Joi.string().min(11).required()
-    .label('Phone number')
+const validateRegistration = Joi.object({
+  lastname: Joi.string().required(),
+  othernames: Joi.string().required(),
+  email: Joi.string().email({ minDomainSegments: 2 }),
+  phone_number: Joi.string().min(11).required().label("Phone number").messages({
+    "string.empty": `"Phone Number" cannot be an empty`,
+    "string.min": `"Phone Number should have length of 11 digits`,
+    "any.required": `"hone Number" is a required field`,
+  }),
+  password: Joi.string()
+    .min(8)
+    .regex(/^(?=\S*[a-z])(?=\S*[A-Z])(?=\S*\d)(?=\S*[^\w\s])\S{8,30}$/)
+    .required()
+    .label("Password")
     .messages({
-    'string.empty': `"Phone Number" cannot be an empty`,
-    'string.min': `"Phone Number should have length of 11 digits`,
-    'any.required': `"hone Number" is a required field`,
-     }),
-    password:  Joi.string().min(8).regex(/^(?=\S*[a-z])(?=\S*[A-Z])(?=\S*\d)(?=\S*[^\w\s])\S{8,30}$/).required()
-    .label('Password')
-    .messages({
-    'string.empty': `"Password" cannot be an empty`,
-    'string.min': `"Password" should have a minimum length of {#limit}`,
-    'any.required': `"Password" is a required field`,
-    'object.regex' : `Must have at least 8 characters`,
-    'string.pattern.base': `Password must contain at least a number, letter and special characters`
-    }), 
-    referrer_code: Joi.string().optional(),
-    who_referred_customer: Joi.string().optional(),
-    signup_channel: Joi.string().optional()
-
-})
+      "string.empty": `"Password" cannot be an empty`,
+      "string.min": `"Password" should have a minimum length of {#limit}`,
+      "any.required": `"Password" is a required field`,
+      "object.regex": `Must have at least 8 characters`,
+      "string.pattern.base": `Password must contain at least a number, letter and special characters`,
+    }),
+  referrer_code: Joi.string().optional(),
+  who_referred_customer: Joi.string().optional(),
+  signup_channel: Joi.string().optional(),
+});
 
 const completeForgotPassword = Joi.object({
     email: Joi.string().email({ minDomainSegments: 2 }),
@@ -58,7 +58,8 @@ const updateUserInfo = Joi.object({
 
 
 module.exports = {
-    create, completeForgotPassword,
-    changePassword, updateUserInfo,
-    
-}
+  validateRegistration,
+  completeForgotPassword,
+  changePassword,
+  updateUserInfo,
+};

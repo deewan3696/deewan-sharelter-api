@@ -14,7 +14,7 @@ const port = process.env.APP_PORT || 3000
 const  {redisClient} = require('./src/config/redis')
 const db = require('./src/config/database')
 const userRoutes = require('./src/routes/users')
-//const redis = require("redis");
+const redis = require("redis");
 const app = express()
 
 // Use Helmet!

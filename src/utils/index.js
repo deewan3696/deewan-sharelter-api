@@ -68,13 +68,26 @@ const generateOTP = () => {
     return _otp
 }
 
-const generateReferralCode = () => {
-    /* todo:
+const generateReferralCode = (length) => {
+  /* todo:
      *
         to work on this later
     */
-    
-}
+  // Function to generate a random referral code
+  
+    // const characters ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    // let referralCode = "";
+
+    // for (let i = 0; i < length; i++) {
+    //   const referRandom = Math.floor(Math.random() * characters.length);
+    //   referralCode += characters.charAt(referRandom);
+    // }
+
+    // return referralCode;
+  
+
+ 
+};
 
 
 const generateChecksum = (transId, sellingCurrencyAmount,
