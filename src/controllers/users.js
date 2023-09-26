@@ -3,7 +3,7 @@ const { hashMyPassword, generateOTP,generateReferralCode } = require("../utils/i
 const redis = require("redis");
 const {readFileAndSendEmail}= require("../services/email")
 const { redisClient } = require('../config/redis')
-//const {validateRegistration} = require("../validations/users")
+
 
 
 
@@ -11,8 +11,7 @@ const { redisClient } = require('../config/redis')
 const create = async (req, res, next) => {
   const { lastname, othernames, email, phone_number, password, referrer_code } = req.body;
 
-    // const { error } = validateRegistration(req.body);
-    // if (error != undefined) throw new Error(error.details[0].message);
+   
 
 
   try {
@@ -49,7 +48,7 @@ const create = async (req, res, next) => {
     });
     await insertOne("otps", otpModel);
 
-    readFileAndSendEmail(email,"OTP",` Hello  ${lastname} ${othernames},\n Your OTP is ${_otp}`);
+    //readFileAndSendEmail(email,"OTP",` Hello  ${lastname} ${othernames},\n Your OTP is ${_otp}`);
 
     res.status(201).json({
       status: true,

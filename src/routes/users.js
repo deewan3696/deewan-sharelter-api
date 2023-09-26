@@ -42,7 +42,7 @@ const { create } = require("../controllers/users");
  *        422:
  *          Bad Request
  */
-router.post("/user/create", create);
+router.post("/user/create",validationMiddleware(validationData) ,create);
 
 //LISTINGS ROUTES
 
