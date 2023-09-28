@@ -52,7 +52,16 @@ const hashMyPassword = async (mypassword) => {
 
     })
 }
-
+const comparePassword = async (mypassword, hashPassword) => {
+  return new Promise((resolve, reject) => {
+    let result = bcrypt.compare(mypassword, hashPassword);
+    if (result) {
+      resolve(result);
+    } else {
+      reject(err);
+    }
+  });
+};
 const generateOTP = () => {
     let digits = '123456789'
     let _otp = ''
@@ -111,12 +120,13 @@ const verifyChecksum = (paymentTypeId, transId, userId,
 
 
 module.exports = {
-    asyncErrorManager,
-    isEmpty,
-    makePhoneNumberInternational,
-    hashMyPassword,
-    generateOTP,
-    generateReferralCode,
-    generateChecksum,
-    verifyChecksum
-}
+  asyncErrorManager,
+  isEmpty,
+  makePhoneNumberInternational,
+  hashMyPassword,
+  generateOTP,
+  generateReferralCode,
+  generateChecksum,
+  verifyChecksum,
+  comparePassword,
+};
