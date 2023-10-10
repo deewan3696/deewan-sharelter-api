@@ -35,6 +35,17 @@ const updateOne = async (collection, data) => {
 const updateMany = async (collection, data) => {
   //todos
 };
+const deleteOne = async (collection, data) => {
+  const Database = DbConnection.getDb();
+  const coll = Database.collection(collection);
+  const insert_details = await coll.deleteOne(data);
+  return insert_details;
+};
+
+// To delete multiple documents, use db. collection. deleteMany() 
+// To delete a single document, use db. collection. deleteOne()
+
+
 
 module.exports = {
   find,
@@ -43,4 +54,5 @@ module.exports = {
   insertOne,
   updateOne,
   updateMany,
+  deleteOne,
 };

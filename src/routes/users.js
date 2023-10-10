@@ -3,7 +3,7 @@ const router = express.Router();
 const validationData = require("../validations/users");
 const validationMiddleware = require("../middleware/validation");
 const authorization = require("../middleware/authorization");
-const { create ,login} = require("../controllers/users");
+const { createUser, login,verifyEmailOtp, resendOtpToEmail } = require("../controllers/users");
 
 //USERS ROUTES
 /**
@@ -42,8 +42,10 @@ const { create ,login} = require("../controllers/users");
  *        422:
  *          Bad Request
  */
-router.post("/user/create",validationMiddleware(validationData.validateRegistration),create);
+router.post( "/user/create", validationMiddleware(validationData.validateRegistration),createUser);
 router.post("/login", login);
+router.get("/verify-email-otp/:_otp/:email", verifyEmailOtp);
+//router.post("/resend-email-otp/:email", resendOtpToEmail);
 //LISTINGS ROUTES
 
 //TRANSACTIONS ROUTES

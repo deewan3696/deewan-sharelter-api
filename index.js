@@ -16,6 +16,8 @@ const db = require('./src/config/database')
 const userRoutes = require('./src/routes/users')
 const redis = require("redis");
 const app = express()
+const logger = require("./src/config/logger")
+const { successHandler, errorHandler } = require("./src/config/morgan");
 
 // Use Helmet!
 app.use(helmet()); // set security HTTP headers
@@ -26,6 +28,8 @@ app.use(cors());
 app.options('*', cors());
 app.use(bodyParser.json()); //json request body
 app.use(express.urlencoded({ extended: true }))// parse urlencoded request body
+app.use(successHandler); //This is from morgan
+app.use(errorHandler); //This is from morgan
 
 //v1 routes
 app.use('/api/v1/', userRoutes)
@@ -41,7 +45,9 @@ redisClient.connect().catch(() => {
 
 
 app.listen(port, () => {
-    console.log(`... listening on ${port}`)
+    logger.info({ message: `...app listening on port ${port}` });
+    //console.log(`... listening on ${port}`)
+    //await db.connect().then((res) => console.log("res"));
  })
 
 
