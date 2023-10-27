@@ -53,7 +53,13 @@ const updateUserInfo = Joi.object({
     accountNumber: Joi.string().required(),
     bankName: Joi.string().required()
 })
-
+const login = Joi.object({
+  email: Joi.string().required(),
+  password: Joi.string().required(),
+});
+const validateEmail = Joi.object({
+  email: Joi.string().email({ minDomainSegments: 2 }).required(),
+});
 
 
 
@@ -62,4 +68,6 @@ module.exports = {
   completeForgotPassword,
   changePassword,
   updateUserInfo,
+  login,
+  validateEmail,
 };

@@ -11,7 +11,7 @@ const {
 const { readFileAndSendEmail } = require("../services/email");
 const { redisClient } = require("../config/redis");
 const { v4: uuidv4 } = require("uuid");
-const jwt = require("jsonwebtoken");
+//const jwt = require("jsonwebtoken");
 const {
   CustomerCreated,
   resetCustomerPasswordSuccessful,
@@ -25,6 +25,9 @@ const {
   LoginSuccessful,
 } = require("../constants/messages");
 const logger = require("../config/logger");
+
+
+
 
 const createUser = async (req, res, next) => {
   const { lastname, othernames, email, phone_number, password, referrer_code } =
@@ -91,130 +94,176 @@ const createUser = async (req, res, next) => {
   }
 };
 
-//to work on it 
-  const verifyEmailOtp = async (req, res, next) => {
-    const { email, otp } = req.params;
-    try {
-      const data = await redisClient.get(`${email}`);
-      console.log("data: " ,data);
 
-      if (!data) {
-        logger.error({
-          message: `email is not valid ${email}`,
-          status: 422,
-          method: req.method,
-          ip: req.ip,
-          url: req.originalUrl,
-        });
-
-        const err = new Error(InvalidCredentials);
-        err.status = 400;
-        return next(err);
-      }
-
-      if (otp !== data) {
-        logger.error({
-          message: `otp is not valid ${otp}`,
-          status: 422,
-          method: req.method,
-          ip: req.ip,
-          url: req.originalUrl,
-        });
-
-        const err = new Error(OtpMismatch);
-        err.status = 400;
-        return next(err);
-      }
-
-      await updateOne(
-        "Users",
-        { email },
-        { is_verified: true }
-      );
-      res.status(200).json({
-        status: 200,
-        message: EmailVerificationSuccessful,
-        data,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-const login = async (req, res, next) => {
-  const { email, password } = req.body;
+  
+const verifyEmailOtp = async (req, res, next) => {
+  const { email, otp } = req.params;
   try {
-    const checkEmail = await findQuery("Users", { email: email });
-
-    //console.log("checkEmail:", checkEmail);
-
-    if (isEmpty(checkEmail)) throw new Error("Invalid Credentials");
-
-    const payload = checkEmail[0].passwordhash;
-    //console.log("payload:", payload);
-    const checkIfPasswordMatch = await comparePassword(password, payload);
     
-    //console.log("checkIfPasswordMatch:", checkIfPasswordMatch);
-
-    if (!checkIfPasswordMatch) throw new Error("Invalid Credentials");
-
-    const token = jwt.sign(
-      {
-        id: uuidv4,
-        email: checkEmail.email,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.status(200).json({
-      status: "success",
-      message: "User logged in successfully",
-      data: token,
+    const  user = await findQuery("Users", {
+      email: email,
     });
+    if (user.length === 0) {
+      logger.error({
+        message: `Invalid credentials. details supplied is ${JSON.stringify(
+          req.body
+        )}`,
+        status: 422,
+        method: req.method,
+        url: req.originalUrl,
+      });
+
+      const err = new Error(InvalidCredentials);
+      err.status = 400;
+      return next(err);
+    } else {
+      
+      const otpFromRedis = await redisClient.get(email);
+
+      if (otpFromRedis === otp) {
+        
+        await updateOne("Users", { email: email }, { is_email_verified: true });
+        redisClient.del(email);
+        res.status(200).json({
+          status: true,
+          message: "Account verification successful",
+        });
+      } else {
+        
+        logger.error({
+          message: `Unable to verify email. details supplied is ${JSON.stringify(
+            req.params
+          )}`,
+          status: 500,
+          method: req.method,
+          url: req.originalUrl,
+        });
+
+        const err = new Error(EmailHasNotBeenVerified);
+        err.status = 500;
+        return next(err);
+      }
+    }
   } catch (error) {
     next(error);
   }
 };
 
+
 const resendOtpToEmail = async (req, res, next) => {
-      const { email } = req.body;
-      try {
-        if (!email) throw new Error(InvalidCredentials);
-        if (!email) {
-          logger.error({
-            message: `email is not valid ${email}`,
-            status: 422,
-            method: req.method,
-            ip: req.ip,
-            url: req.originalUrl,
-          });
+  const { email } = req.params;
+  const newOtp = generateOTP();
+  console.log(newOtp);
+  try {
+    const otpFromRedis = await redisClient.get(email);
+    if (otpFromRedis) {
+      return res.status(200).json({
+        status: true,
+        message: "OTP have not expired",
+      });
+    } else {
+      const getOtp = await redisClient.set(email, newOtp, { EX: 60 * 10 });
 
-          const err = new Error(InvalidCredentials);
-          err.status = 400;
-          return next(err);
-        }
-        const _otp = generateOTP();
-        console.log("_otp : ", _otp);
-        redisClient.set(`${email}`, JSON.stringify(_otp), {
-          EX: 60 * 5, //seconds
-          NX: true,
+      if (getOtp != "OK") {
+        logger.error({
+          message: `Unable to create account. details supplied is ${JSON.stringify(
+            req.body
+          )}`,
+          status: 500,
+          method: req.method,
+          url: req.originalUrl,
         });
 
-    //readFileAndSendEmail(email, "OTP", ` Hello  ${lastname} ${othernames},\n Your New OTP is ${_otp}`);
-
-        res.status(200).json({
-          status: 200,
-          message: OtpResentSuccessfully,
-        });
-      } catch (error) {
-        next(error);
+        const err = new Error("Unable to create account");
+        err.status = 500;
+        return next(err);
       }
- };
+      //Send Email
+
+      const dataToBeReplaced = {
+        otp: newOtp,
+      };
+
+      const sendMail = await readFileAndSendEmail(
+        email,
+        " Xwapit OTP Resend",
+        dataToBeReplaced,
+        "otp"
+      );
+
+      res.status(200).send({
+        status: true,
+        message: "otp resent to email",
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+const startForgetPassword = async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    const checkIfUserExist = await findOne(xwapitDB_collections.users, {
+      email: email,
+    });
+
+    if (!checkIfUserExist) throw new Error("user not found");
+
+    const _otp = generateOtp(6);
+    console.log(_otp);
+    res.status(400).json({
+      status: true,
+      message: "otp has been sent to your email, " || "an error occurred",
+      otp: _otp,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      status: false,
+      message: error.message || "an error occurred",
+    });
+  }
+};
+
+const completeForgotPassword = async (req, res, next) => {
+  const { newPassword, email,} = req.body;
+  const { otp } = req.params;
+  try {
+    // if(otp!=process.env.OTP) throw new Error ("Invalid otp")
+    //we have to verify otp
+    const { hash, salt } = await hashPassword(newPassword);
+    await updateOne(
+      "Users",
+      { email },
+      {
+        passwordHash: hash,
+        passwordSalt: salt,
+      }
+    );
+    res.status(400).json({
+      status: true,
+      message: resetCustomerPasswordSuccessful || "an error occurred",
+      // otp: _otp,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      status: false,
+      message: error.message || "an error occurred",
+    });
+  }
+};
+
+
+
 
 module.exports = {
   createUser,
-  login,
+  
   verifyEmailOtp,
   resendOtpToEmail,
+  startForgetPassword,
+  completeForgotPassword,
 };
