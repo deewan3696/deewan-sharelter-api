@@ -34,12 +34,25 @@ const logger = require("../config/logger");
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
+  // try {
+  //   const checkEmail = await findQuery("Users", { email: email });
+
+  //   //console.log("checkEmail:", checkEmail);
+
+  //   if (isEmpty(checkEmail)) throw new Error(InvalidCredentials);
+
   try {
+    if (!email || !password) {
+      res.status(400);
+      throw new Error("All fields are required");
+    }
+    //check if the user already exists
     const checkEmail = await findQuery("Users", { email: email });
 
-    //console.log("checkEmail:", checkEmail);
-
-    if (isEmpty(checkEmail)) throw new Error(InvalidCredentials);
+    if (checkEmail == null) {
+      res.status(400);
+      throw new Error("Invalid credentials");
+    }
 
     const payload = checkEmail[0].passwordhash;
     //console.log("payload:", payload);
@@ -68,6 +81,4 @@ const login = async (req, res, next) => {
   }
 };
 
-
-
-module.exports = {login}
+module.exports = login;

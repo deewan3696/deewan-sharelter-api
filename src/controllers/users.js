@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { findQuery, insertOne, find, deleteOne,updateOne } = require("../repository");
+const { findQuery, insertOne, find, deleteOne,updateMany } = require("../repository");
 const {
   hashMyPassword,
   generateOTP,
@@ -73,13 +73,10 @@ const createUser = async (req, res, next) => {
     //   email: createUser.email,
     //   otp: _otp,
     // };
-    redisClient.set(`${createUser.email}`, JSON.stringify(_otp), {
-      EX: 60 * 3, //seconds
-      //NX: true,
-    });
+    redisClient.set(email, _otp, { EX: 60 * 10 });
     //await insertOne("otps", otpModel);
 
-    readFileAndSendEmail(email,"OTP",` Hello  ${lastname} ${othernames},\n Your OTP is ${_otp}`);
+    // readFileAndSendEmail(email,"OTP",` Hello  ${lastname} ${othernames},\n Your OTP is ${_otp}`);
 
     // Verify the OTP
   
@@ -100,10 +97,11 @@ const verifyEmailOtp = async (req, res, next) => {
   const { email, otp } = req.params;
   try {
     
-    const  user = await findQuery("Users", {
+    const user = await find("Users", {
       email: email,
     });
-    if (user.length === 0) {
+    console.log("user", user);
+    if (user.length > 0) {
       logger.error({
         message: `Invalid credentials. details supplied is ${JSON.stringify(
           req.body
@@ -119,11 +117,15 @@ const verifyEmailOtp = async (req, res, next) => {
     } else {
       
       const otpFromRedis = await redisClient.get(email);
-
+       console.log("otpFromRedis", otpFromRedis);
       if (otpFromRedis === otp) {
         
-        await updateOne("Users", { email: email }, { is_email_verified: true });
-        redisClient.del(email);
+        await updateMany(
+          "Users",
+          { email: email },
+          { is_email_verified: true }
+        );
+      //redisClient.del(email);
         res.status(200).json({
           status: true,
           message: "Account verification successful",
@@ -261,7 +263,6 @@ const completeForgotPassword = async (req, res, next) => {
 
 module.exports = {
   createUser,
-  
   verifyEmailOtp,
   resendOtpToEmail,
   startForgetPassword,

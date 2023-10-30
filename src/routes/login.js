@@ -3,14 +3,7 @@ const router = express.Router();
 const validationData = require("../validations/users");
 const validationMiddleware = require("../middleware/validation");
 const authorization = require("../middleware/authorization");
-const {login} = require ("../controllers/login")
-
-
-
-
-
-
-
+const login = require("../controllers/login");
 
 /**
  * Logs a customer into the app
@@ -37,4 +30,6 @@ const {login} = require ("../controllers/login")
  *          Bad Request
  */
 
-router.post("/login", validationMiddleware(validationData.login), login);
+router.post("/login", login);
+
+module.exports = router;

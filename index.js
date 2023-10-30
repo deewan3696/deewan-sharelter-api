@@ -14,6 +14,7 @@ const port = process.env.APP_PORT || 8908;
 const { redisClient } = require("./src/config/redis");
 const db = require("./src/config/database");
 const userRoutes = require("./src/routes/users");
+const loginRoutes = require("./src/routes/login");
 const redis = require("redis");
 const app = express();
 const logger = require("./src/config/logger");
@@ -33,6 +34,7 @@ app.use(errorHandler); //This is from morgan
 
 //v1 routes
 app.use("/api/v1/", userRoutes);
+app.use("/api/v1/", loginRoutes);
 
 //connect to database
 db.connect();
