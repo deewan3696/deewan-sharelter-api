@@ -45,6 +45,10 @@ const listingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    listing_deleted: {
+      type: Boolean,
+      default: false,
+    },
     comments: {
       type: String,
     },
