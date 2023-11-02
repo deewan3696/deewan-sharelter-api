@@ -73,7 +73,7 @@ const createUser = async (req, res, next) => {
     //   email: createUser.email,
     //   otp: _otp,
     // };
-    redisClient.set(email, _otp, { EX: 60 * 10 });
+    redisClient.set(createUser.email, _otp, { EX: 60 * 10 });
     //await insertOne("otps", otpModel);
 
     // readFileAndSendEmail(email,"OTP",` Hello  ${lastname} ${othernames},\n Your OTP is ${_otp}`);

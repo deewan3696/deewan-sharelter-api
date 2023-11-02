@@ -1,12 +1,12 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECRET || "keep-secret-secure123#"
-   
+ const {findQuery} = require("../repository/index")
 
 const authorization = async(req, res, next) => {
  
-    const { Authorization } = req.headers
-    if (!Authorization) {
+    const { authorization } = req.headers
+    if (!authorization) {
         res.status(401).send({
             status: false,
             message: 'Unauthorized Access'
@@ -14,8 +14,8 @@ const authorization = async(req, res, next) => {
         })
     } else {
 
-        const tokenSplit = Authorization.split(" ")
-        jwt.verify(tokenSplit[1], jwtSecret, (err, decoded) => {
+        const tokenSplit = authorization.split(" ")
+        jwt.verify(tokenSplit[1], jwtSecret,async(err, decoded) => {
 
             if (err) {
                 res.status(401).send({
@@ -24,7 +24,9 @@ const authorization = async(req, res, next) => {
                         
                 })
             }
-            req.params.userData = decoded    
+            const user = await findQuery("Users", { email: decoded.email })
+            
+            req.params.user_id = user[0].user_id   
             next()   
          
         })

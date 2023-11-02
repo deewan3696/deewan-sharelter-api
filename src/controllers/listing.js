@@ -1,6 +1,7 @@
 require("dotenv").config()
 const { findquery, insertOne, findOne, updateOne} = require("../repository/index")
 const { v4: uuidv4 } = require("uuid");
+const { redisClient } = require("../config/redis");
 const {
   createdListings,
   deleteListings,
@@ -8,11 +9,11 @@ const {
   getListingMessage,
   listingNotFound,
 } = require("../constants/messages");
-const { v4: uuidv4 } = require("uuid");
+
 
 
 const createListing = async (req, res, next) => {
-  const { user_id } = req.params;
+  const {user_id}  = req.params;
   
     const {
       number_of_listing,
@@ -24,22 +25,26 @@ const createListing = async (req, res, next) => {
     } = req.body;
 
   try {
-    const newListing = new Listing({
-      listing_id:uuidv4(),
-      user_id: "",
+    const newListing = {
+      listing_id: uuidv4(),
+      user_id: user_id,
       number_of_listing,
       location,
       photo_url,
       price,
       listing_types,
       occupancy_limit,
-    });
+    };
+    redisClient.set(newListing.listing_id, photo_url, { EX: 60 * 10 });
+    
     await insertOne("Listing", newListing);
     res.status(201).json({
       status: true,
       message: createdListings,
-      data: newListing,
+      data:[]
     });
+  
+
   } catch (error) {
     next(error);
   }
@@ -73,7 +78,7 @@ const getListing = async (req, res, next) => {
     res.status(200).json({
       status: true,
       message: getListingMessage,
-      data,
+      data
     });
   } catch (error) {
     console.log(error);
@@ -86,7 +91,7 @@ const getListing = async (req, res, next) => {
 const deleteListing = async (req, res, next) => {
   const { listing_id } = req.params;
   try {
-    await updateOne("Products", { listing_id }, { listing_deleted: true });
+    await updateOne("Listing", { listing_id }, { listing_deleted: true });
     res.status(200).json({
       status: true,
       message: deleteListings,

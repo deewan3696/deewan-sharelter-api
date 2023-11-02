@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const validationData = require("../validations/users");
+const  validateListing  = require("../validations/listing");
 const validationMiddleware = require("../middleware/validation");
+const validationData = require("../validations/users");
 const authorization = require("../middleware/authorization");
 const {createListing} = require("../controllers/listing");
 
@@ -43,4 +44,11 @@ const {createListing} = require("../controllers/listing");
  *        422:
  *          Bad Request
  */
-router.post("/create-listing",validationMiddleware(validationData.create),createListing);
+router.post(
+    "/create-listing",
+    authorization,
+  validationMiddleware(validateListing),
+  createListing
+);
+
+module.exports = router

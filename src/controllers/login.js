@@ -48,7 +48,7 @@ const login = async (req, res, next) => {
     }
     //check if the user already exists
     const checkEmail = await findQuery("Users", { email: email });
-
+    
     if (checkEmail == null) {
       res.status(400);
       throw new Error("Invalid credentials");
@@ -60,12 +60,16 @@ const login = async (req, res, next) => {
 
     //console.log("checkIfPasswordMatch:", checkIfPasswordMatch);
 
-    if (!checkIfPasswordMatch) throw new Error("Invalid Credentials");
+    if (!checkIfPasswordMatch) {
+       const err = new Error(InvalidCredentials);
+       err.status = 400;
+       return next(err);
+    }
 
     const token = jwt.sign(
       {
         id: uuidv4,
-        email: checkEmail.email,
+        email: checkEmail[0].email,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }

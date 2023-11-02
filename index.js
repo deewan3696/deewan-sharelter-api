@@ -15,6 +15,7 @@ const { redisClient } = require("./src/config/redis");
 const db = require("./src/config/database");
 const userRoutes = require("./src/routes/users");
 const loginRoutes = require("./src/routes/login");
+const listingRoutes = require("./src/routes/listing");
 const redis = require("redis");
 const app = express();
 const logger = require("./src/config/logger");
@@ -35,6 +36,7 @@ app.use(errorHandler); //This is from morgan
 //v1 routes
 app.use("/api/v1/", userRoutes);
 app.use("/api/v1/", loginRoutes);
+app.use("/api/v1/", listingRoutes);
 
 //connect to database
 db.connect();

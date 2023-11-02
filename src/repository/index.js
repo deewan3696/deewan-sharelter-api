@@ -11,7 +11,8 @@ const findQuery = async (collection,query) => {
     const Database = DbConnection.getDb()
     const coll = Database.collection(collection)
     const data = await coll.find(query).toArray()
-    return data
+    console.log(coll,data)
+  return data
 }
 
 const insertMany=async (collection,data) => {
