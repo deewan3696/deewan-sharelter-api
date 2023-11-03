@@ -43,10 +43,10 @@ const completeForgotPassword = Joi.object({
     
 })
 
-const changePassword = Joi.object({
-    newPassword: Joi.string().required(),
-    confirmNewPassword: Joi.string().required()
-})
+const validateChangePassword = Joi.object({
+  newPassword: Joi.string().required(),
+  confirmNewPassword: Joi.string().required(),
+});
 
 const updateUserInfo = Joi.object({
     bankCode: Joi.string().required(),
@@ -61,13 +61,26 @@ const validateEmail = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
 });
 
+const validateUpdateProfile = Joi.object({
+  lastname: Joi.string().min(3).optional(),
+  othernames: Joi.string().min(3).optional(),
+
+  Address: Joi.string().min(3).optional(),
+  Photo: Joi.string().min(3).optional(),
+  means_of_id: Joi.string().min(3).optional(),
+});
+  
+    
+
+
 
 
 module.exports = {
   validateRegistration,
   completeForgotPassword,
-  changePassword,
+  validateChangePassword,
   updateUserInfo,
   login,
   validateEmail,
+  validateUpdateProfile,
 };

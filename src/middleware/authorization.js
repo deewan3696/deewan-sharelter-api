@@ -5,7 +5,7 @@ const jwtSecret = process.env.JWT_SECRET || "keep-secret-secure123#"
 
 const authorization = async(req, res, next) => {
  
-    const { Authorization } = req.headers
+    const  Authorization  = req.headers.authorization;
     if (!Authorization) {
         res.status(401).send({
             status: false,

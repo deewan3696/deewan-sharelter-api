@@ -32,32 +32,33 @@ const updateOne = async (collection, data,item) => {
   //todos
     const Database = DbConnection.getDb();
     const coll = Database.collection(collection);
-    const insert_details = await coll.updateOne(item, {
+    const update = await coll.updateOne(item, {
       $set: data,
       $currentDate: { updatedAt: true },
     });
-    return insert_details;
+  console.log(update);
+    return update;
 };
 
 const updateMany = async (collection, data,item) => {
   //todos
   const Database = DbConnection.getDb();
   const coll = Database.collection(collection);
-  const insert_details = await coll.updateMany(item, {
+  const update = await coll.updateMany(item, {
     $set:  data,
     $currentDate: { updatedAt: true }
   });
-  return insert_details;
+  return update;
 };
 
 const deleteOne = async (collection, data,item) => {
   const Database = DbConnection.getDb();
   const coll = Database.collection(collection);
-  const insert_details = await coll.deleteOne(item, {
+  const deleteOne = await coll.deleteOne(item, {
     $set: data,
     $currentDate: { updatedAt: true },
   });
-  return insert_details;
+  return deleteOne;
 };
 
 // To delete multiple documents, use db. collection. deleteMany() 

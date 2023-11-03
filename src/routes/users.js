@@ -1,6 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const validationData = require("../validations/users");
+const {
+  validationData,
+  validateUpdateProfile,
+  validateRegistration,
+  validateEmail,
+  completeForgotPassword,
+} = require("../validations/users");
 const validationMiddleware = require("../middleware/validation");
 const authorization = require("../middleware/authorization");
 const {
@@ -8,7 +14,8 @@ const {
   verifyEmailOtp,
   resendOtpToEmail,
   startForgetPassword,
-  completeForgotPassword,
+  completeForgetPassword,
+  updateProfile,
 } = require("../controllers/users");
 
 //USERS ROUTES
@@ -48,7 +55,7 @@ const {
  *        422:
  *          Bad Request
  */
-router.post("/user/create", validationMiddleware(validationData.validateRegistration),createUser);
+router.post("/user/create", validationMiddleware(validateRegistration),createUser);
 
 
 
@@ -122,7 +129,7 @@ router.post("/resend-email-otp/:email", resendOtpToEmail);
  *        422:
  *          Bad Request
 */
-router.get("/start-forget-password/email", validationMiddleware(validationData.validateEmail), startForgetPassword);
+router.get("/start-forget-password/email", validationMiddleware(validateEmail), startForgetPassword);
 
 /**
  * Complete forget password 
@@ -158,7 +165,56 @@ router.get("/start-forget-password/email", validationMiddleware(validationData.v
  *        description: Unauthorized
  * 
 */
-router.patch("/complete-forget-password/:otp", validationMiddleware(validationData.completeForgotPassword), completeForgotPassword);
+router.patch("/complete-forget-password/:otp", validationMiddleware(completeForgotPassword), completeForgetPassword);
+
+
+/**
+ * update a user's details
+ * @swagger
+ * /users/update-user :
+ *   patch:
+ *     summary: updates a registered user's profile
+ *     description: this enables the user to edit their profile
+ *     tags:
+ *       - Users
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: lastname
+ *         in: body
+ *         required: false
+ *       - name: othernames
+ *         in: body
+ *         required: false
+ *       - name: email
+ *         in: body
+ *         required: false
+ *       - name: phone_number
+ *         in: body
+ *         required: false
+ *       - name: address
+ *         in: body
+ *         required: false
+ *       - name: photo
+ *         in: body
+ *         required: false
+ *       - name: means_of_id
+ *         in: body
+ *         required: false
+ *     responses:
+ *        200:
+ *          description: User details updated Successfully.
+ *        422:
+ *          Bad Request
+ *        404:
+ *         description: The link has expired or is invalid
+ *        500:
+ *         description: Internal Server Error
+ *        401:
+ *        description: Unauthorized
+ */
+router.patch("/update-user",authorization,validationMiddleware(validateUpdateProfile),updateProfile);
+
 
 //LISTINGS ROUTES
 

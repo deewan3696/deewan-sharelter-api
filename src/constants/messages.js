@@ -18,6 +18,7 @@ module.exports = {
   CustomerDetailsFetched: "User details successfully fetched",
   UnableToLoadCustomerDetails: "Unable To Load Customer Details.",
   CustomerCreationFailed: "Customer Creation Failed.",
+  CustomerUpdatedSuccessfully: "Customer Updated Successfully ",
   BVNExist: "You have a bvn linked to your profile.",
   BVNValidated: "Bvn validated",
   BVNDOBMismatch: "Your BVN or date of birth isnt right. Please, check again.",
