@@ -11,6 +11,7 @@ const { log } = require("handlebars");
 const { CreatedListings,
   DeleteListings,
   UpdateListings,
+  GetListingMessage,
   InvalidCredentials,
   CompleteListing,
   UnableToCompleteThisTransactionPleaseContactCustomerSupport,
@@ -20,16 +21,24 @@ const { CreatedListings,
 const startListing = async (req, res, next) => {
   try {
     const { user_id } = req.params;
-    const { locations, description, photo_url, listing_type, price } = req.body;
+    const {
+      location,
+      number_of_listings,
+      photo_url,
+      listing_types,
+      price,
+      occupancy_limit,
+    } = req.body;
 
     const createListing = {
       listing_id: uuidv4(),
       user_id,
-      locations,
-      description,
-      price,
-      listing_type,
+      location,
+      number_of_listings,
       photo_url,
+      listing_types,
+      price,
+      occupancy_limit,
     };
 
     await insertOne("Listing", createListing);
@@ -45,9 +54,9 @@ const startListing = async (req, res, next) => {
 const completeListing = async (req, res) => {
   const { user_id } = req.params;
   try {
-    const { reference, listing_id, amount } = req.body;
+    const { reference, amount } = req.body;
     
-      if (error != undefined) {
+      if (!reference || !amount) {
           const err = new Error(InvalidCredentials);
           err.status = 400;
           return next(err);
@@ -102,7 +111,7 @@ const deleteListing = async (req, res) => {
         return next(err);
     } 
 
-    await deleteOne("Listing", { listing_id });
+    await deleteOne("Listing", { listing_id }, { listing_deleted: true });
     res.status(200).json({
       status: true,
       message: DeleteListings,
@@ -131,7 +140,27 @@ const updateListing = async (req, res) => {
   }
 };
 
-const getListing = async (req, res) => {};
+const getListing = async (req, res) => {
+    const { listing_id } = req.params;
+  try {
+    const data = await findOne("Listing", { listing_id });
+      if (!data) {
+         const err = new Error(listingNotFound);
+         err.status = 400;
+         return next(err);
+    } 
+    res.status(200).json({
+      status: true,
+      message: GetListingMessage,
+      data,
+    });
+  } catch (error) {
+   next(error);
+  }
+
+};
+  //to be completed asap
+const getAllListings = async (req, res) => {};
 
 module.exports = {
   startListing,
@@ -139,4 +168,5 @@ module.exports = {
   deleteListing,
   updateListing,
   getListing,
+  getAllListings,
 };

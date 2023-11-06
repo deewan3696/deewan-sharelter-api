@@ -45,6 +45,11 @@ const listingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isPaid: {
+      type: Boolean,
+      default: false,
+      required: true,   //i need enlightenment on this 
+    },
     comments: {
       type: String,
     },

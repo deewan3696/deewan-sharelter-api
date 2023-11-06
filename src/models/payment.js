@@ -25,6 +25,10 @@ const paymentSchema = new mongoose.Schema(
     payment_reference: {
       type: String,
     },
+    amount: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );
