@@ -88,4 +88,12 @@ module.exports = {
   ResetPasswordlinkSentSuccessfully: "Reset Password link sent successfully",
   resetCustomerPasswordSuccessful: "Your password has been reset successfully",
   invalidPhone: "Please a valid phone number",
+
+  GetListingMessage: "Listing retrieved successfully",
+  CreatedListings: "Listing created succesfully",
+  UpdateListings: "Listing updated succesfully",
+  DeleteListings: "Listing deleted succesfully ",
+  ListingNotFound: "Listing not found",
+  
 };
+

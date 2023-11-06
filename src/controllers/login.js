@@ -19,15 +19,9 @@ const { redisClient } = require("../config/redis");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 const {
-  CustomerCreated,
-  resetCustomerPasswordSuccessful,
+
   CustomerExist,
   InvalidCredentials,
-  invalidPhone,
-  EmailHasNotBeenVerified,
-  OtpMismatch,
-  OtpResentSuccessfully,
-  EmailVerificationSuccessful,
   LoginSuccessful,
 } = require("../constants/messages");
 const logger = require("../config/logger");

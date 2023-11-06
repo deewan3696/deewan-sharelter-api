@@ -8,6 +8,11 @@ const { completePayment, startPayment } = require("../services/payment");
 const { redisClient } = require("../config/redis");
 const { v4: uuidv4 } = require("uuid");
 const { log } = require("handlebars");
+const { CreatedListings,
+  DeleteListings,
+  UpdateListings,
+  GetListingMessage,
+  ListingNotFound,} = require("../constants/messages")
 
 const startListing = async (req, res, next) => {
   try {
