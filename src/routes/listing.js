@@ -65,7 +65,7 @@ router.post(
  * help to make payment for  listing for a customer
  * @swagger
  * /listings:
- *   post:
+ *   get:
  *     summary: completely creates a new listing
  *     description: This Creates a new listing for the user
  *     tags:
@@ -98,13 +98,19 @@ router.post(
  *          Bad Request
  */
 
-router.post(
+router.get(
   "/complete-listing",
   authorization,
   validationMiddleware(completeListingValidation),
   completeListing
 );
 
+
+
+router.delete("/listing/:listing_id", authorization, deleteListing);
+router.patch("/listing/:listing_id", authorization, updateListing);
+router.get("/listing/:lisitng_id", authorization, getListing);
+//router.get("/listing", authorization, getAllListings);
 
 
 

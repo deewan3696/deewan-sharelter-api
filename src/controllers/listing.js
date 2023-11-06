@@ -1,9 +1,5 @@
 const { findQuery, insertOne, updateOne, deleteOne } = require("../repository");
-const {
-  validateListing,
-  validateCompleteListing,
-  validateUpdateListing,
-} = require("../validations/listings");
+
 const { completePayment, startPayment } = require("../services/payment");
 const { redisClient } = require("../config/redis");
 const { v4: uuidv4 } = require("uuid");
