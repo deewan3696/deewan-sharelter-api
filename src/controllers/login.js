@@ -32,35 +32,40 @@ const {
 } = require("../constants/messages");
 const logger = require("../config/logger");
 
+
+
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  // try {
-  //   const checkEmail = await findQuery("Users", { email: email });
 
-  //   //console.log("checkEmail:", checkEmail);
-
-  //   if (isEmpty(checkEmail)) throw new Error(InvalidCredentials);
 
   try {
     if (!email || !password) {
-      res.status(400);
-      throw new Error("All fields are required");
+     
+       const err = new Error(InvalidCredentials);
+       err.status = 400;
+       return next(err);
     }
     //check if the user already exists
     const checkEmail = await findQuery("Users", { email: email });
 
     if (checkEmail == null) {
-      res.status(400);
-      throw new Error("Invalid credentials");
+     
+        const err = new Error(InvalidCredentials);
+        err.status = 400;
+        return next(err);
     }
 
-    const payload = checkEmail[0].passwordhash;
+    const payload = checkEmail[0].passwordHash;
     //console.log("payload:", payload);
     const checkIfPasswordMatch = await comparePassword(password, payload);
 
     //console.log("checkIfPasswordMatch:", checkIfPasswordMatch);
 
-    if (!checkIfPasswordMatch) throw new Error("Invalid Credentials");
+    if (!checkIfPasswordMatch) {
+       const err = new Error(InvalidCredentials);
+       err.status = 400;
+       return next(err);
+    }
 
     const token = jwt.sign(
       {
@@ -73,7 +78,7 @@ const login = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      message: "User logged in successfully",
+      message: LoginSuccessful,
       data: token,
     });
   } catch (error) {

@@ -16,6 +16,7 @@ const {
   startForgetPassword,
   completeForgetPassword,
   updateProfile,
+  profile
 } = require("../controllers/users");
 
 //USERS ROUTES
@@ -215,6 +216,37 @@ router.patch("/complete-forget-password/:otp", validationMiddleware(completeForg
  */
 router.patch("/update-user",authorization,validationMiddleware(validateUpdateProfile),updateProfile);
 
+
+/**
+ * get one user's details
+ * @swagger
+ * /users/profile :
+ *   get:
+ *     summary: updates a registered user's profile
+ *     description: this enables the user to edit their profile
+ *     tags:
+ *       - Users
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: user_id
+ *         in: body
+ *         required: false
+ *   
+ *     responses:
+ *        200:
+ *          description: User details updated Successfully.
+ *        422:
+ *          Bad Request
+ *        404:
+ *         description: The link has expired or is invalid
+ *        500:
+ *         description: Internal Server Error
+ *        401:
+ *        description: Unauthorized
+ */
+
+router.get("/user-profile/:user_id", authorization, profile);
 
 //LISTINGS ROUTES
 

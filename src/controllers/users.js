@@ -74,7 +74,7 @@ const createUser = async (req, res, next) => {
       email,
       phone_number,
       referrer_code: referCode,
-      passwordhash: passwordhash[1],
+      passwordHash: passwordhash[1],
       passwordSalt: passwordhash[0],
     };
 
