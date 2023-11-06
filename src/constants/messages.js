@@ -94,6 +94,7 @@ module.exports = {
   UpdateListings: "Listing updated succesfully",
   DeleteListings: "Listing deleted succesfully ",
   ListingNotFound: "Listing not found",
+  CompleteListing: "Listing completed succesfully",
   
 };
 

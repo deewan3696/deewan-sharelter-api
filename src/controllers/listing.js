@@ -11,7 +11,10 @@ const { log } = require("handlebars");
 const { CreatedListings,
   DeleteListings,
   UpdateListings,
-  GetListingMessage,
+  InvalidCredentials,
+  CompleteListing,
+  UnableToCompleteThisTransactionPleaseContactCustomerSupport,
+  InvalidTransactionReference,
   ListingNotFound,} = require("../constants/messages")
 
 const startListing = async (req, res, next) => {
@@ -29,10 +32,10 @@ const startListing = async (req, res, next) => {
       photo_url,
     };
 
-    await insertOne("Listings", createListing);
+    await insertOne("Listing", createListing);
     res.status(201).json({
       status: true,
-      message: "listing created successfully",
+      message: CreatedListings,
     });
   } catch (error) {
     return next(error);
@@ -43,17 +46,30 @@ const completeListing = async (req, res) => {
   const { user_id } = req.params;
   try {
     const { reference, listing_id, amount } = req.body;
-    const { error } = validateCompleteListing(req.body);
-    if (error != undefined) throw new Error(error.details[0].message);
+    
+      if (error != undefined) {
+          const err = new Error(InvalidCredentials);
+          err.status = 400;
+          return next(err);
+      }
+        
 
-    const checkIfReferenceExist = await findQuery("Transactions", {
+    const checkIfReferenceExist = await findQuery("Transaction", {
       payment_reference: reference,
     });
-    if (checkIfReferenceExist.length > 0) throw new Error("invalid reference");
+      if (checkIfReferenceExist.length > 0) {
+          const err = new Error(InvalidTransactionReference);
+          err.status = 400;
+          return next(err);
+    } 
 
     const completeTransaction = await completePayment(reference);
-    if (completeTransaction.data.data.status != "success")
-      throw new Error("invalid transaction");
+      if (completeTransaction.data.data.status != "success") {
+          const err = new Error(UnableToCompleteThisTransactionPleaseContactCustomerSupport);
+          err.status = 400;
+          return next(err);
+    }
+      
 
     const createTransaction = {
       transaction_id: uuidv4(),
@@ -64,58 +80,54 @@ const completeListing = async (req, res) => {
       transaction_status: "COMPLETED",
     };
 
-    await insertOne("Transactions", createTransaction);
+    await insertOne("Transaction", createTransaction);
 
-    await updateOne("Listings", { listing_id }, { isPaid: true });
+    await updateOne("Listing", { listing_id }, { isPaid: true });
     res.status(201).json({
       status: true,
-      message: "listing completed successfully",
+      message: CompleteListing,
     });
   } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: error.message,
-    });
+  next(error);
   }
 };
 
 const deleteListing = async (req, res) => {
-  // don't know if it's an admin endpoint or not yet
+  
   const { listing_id } = req.params;
   try {
-    if (!listing_id) throw new Error("unauthorize request");
+      if (!listing_id) {
+        const err = new Error(ListingNotFound);
+        err.status = 400;
+        return next(err);
+    } 
 
-    await deleteOne("Listings", { listing_id });
+    await deleteOne("Listing", { listing_id });
     res.status(200).json({
       status: true,
-      message: "listing deleted successfully",
+      message: DeleteListings,
     });
   } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: error.message,
-    });
+     next(error);
   }
 };
 
 const updateListing = async (req, res) => {
-  const { user, listing_id } = req.params;
+  const { user_id, listing_id } = req.params;
   try {
-    if (!user || !listing_id) throw new Error("unauthorize request");
+      if (!user_id || !listing_id) {
+         const err = new Error(InvalidCredentials);
+         err.status = 400;
+         return next(err);
+    } 
 
-    const { error } = validateUpdateListing(req.body);
-    if (error != undefined) throw new Error(error.details[0].message);
-
-    await updateOne("Listings", { listing_id }, req.body);
+    await updateOne("Listing", { listing_id }, req.body);
     res.status(200).json({
       status: true,
-      message: "listing updated successfully",
+      message: UpdateListings,
     });
   } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
